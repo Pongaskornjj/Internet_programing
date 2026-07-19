@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext, useState } from "react";
+import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 
 export type Product = {
   id: string;
@@ -43,21 +43,25 @@ type AppContextType = {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-const INITIAL_PRODUCTS: Product[] = [
-  { id: "1", name: "Louis Vuitton Bag", brand: "Louis Vuitton", price: 85000, oldPrice: 95000, rating: 4.8, category: "Bags", image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3" },
-  { id: "2", name: "Gucci Sneakers", brand: "Gucci", price: 32000, oldPrice: null, rating: 4.6, category: "Shoes", image: "https://images.unsplash.com/photo-1593032465171-8c9d6e1f0c01" },
-  { id: "3", name: "Chanel Sunglasses", brand: "Chanel", price: 18500, oldPrice: 21000, rating: 4.9, category: "Accessories", image: "https://images.unsplash.com/photo-1572635196237-14b3f281503f" },
-];
+const PRODUCTS_URL =
+  "https://raw.githubusercontent.com/Pongaskornjj/Internet_programing/main/products.json";
 
 const MOCK_USERS = [{ username: "admin", password: "1234", email: "admin@brandname.com", role: "admin" as Role }];
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
+  const [products, setProducts] = useState<Product[]>([]);
   const [users, setUsers] = useState(MOCK_USERS);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [favorites, setFavorites] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetch(PRODUCTS_URL)
+      .then((res) => res.json())
+      .then((data: Product[]) => setProducts(data))
+      .catch((err) => console.error("โหลดข้อมูลสินค้าไม่สำเร็จ:", err));
+  }, []);
 
   const login = (username: string, password: string) => {
     const found = users.find((u) => u.username === username && u.password === password);
