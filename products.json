@@ -1,50 +1,62 @@
 [
   {
+    "id": "1",
     "name": "Hermès Birkin Bag",
     "brand": "Hermès",
     "category": "Bags",
     "price": 450000,
-    "original_price": 480000,
-    "image_url": "https://images.unsplash.com/photo-1584917865442-de89df76afd3"
+    "oldPrice": 480000,
+    "rating": 4.9,
+    "image": "https://images.unsplash.com/photo-1584917865442-de89df76afd3"
   },
   {
+    "id": "2",
     "name": "Dior Saddle Bag",
     "brand": "Dior",
     "category": "Bags",
     "price": 95000,
-    "original_price": null,
-    "image_url": "https://images.unsplash.com/photo-1591561954557-26941169b49e"
+    "oldPrice": null,
+    "rating": 4.7,
+    "image": "https://images.unsplash.com/photo-1591561954557-26941169b49e"
   },
   {
+    "id": "3",
     "name": "Prada Loafers",
     "brand": "Prada",
     "category": "Shoes",
     "price": 28000,
-    "original_price": 32000,
-    "image_url": "https://images.unsplash.com/photo-1560769629-975ec94e6a86"
+    "oldPrice": 32000,
+    "rating": 4.6,
+    "image": "https://images.unsplash.com/photo-1560769629-975ec94e6a86"
   },
   {
+    "id": "4",
     "name": "Balenciaga Triple S Sneakers",
     "brand": "Balenciaga",
     "category": "Shoes",
     "price": 42000,
-    "original_price": null,
-    "image_url": "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a"
+    "oldPrice": null,
+    "rating": 4.5,
+    "image": "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a"
   },
   {
+    "id": "5",
     "name": "Cartier Love Bracelet",
     "brand": "Cartier",
     "category": "Accessories",
     "price": 65000,
-    "original_price": null,
-    "image_url": "https://images.unsplash.com/photo-1611591437281-460bfbe1220a"
+    "oldPrice": null,
+    "rating": 4.8,
+    "image": "https://images.unsplash.com/photo-1611591437281-460bfbe1220a"
   },
   {
+    "id": "6",
     "name": "Tiffany & Co. Necklace",
     "brand": "Tiffany & Co.",
     "category": "Accessories",
     "price": 38000,
-    "original_price": 42000,
-    "image_url": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f"
+    "oldPrice": 42000,
+    "rating": 4.7,
+    "image": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f"
   }
 ]
