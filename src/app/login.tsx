@@ -9,6 +9,13 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const handleLogout = () => {
+    Alert.alert("ออกจากระบบ", "คุณต้องการออกจากระบบใช่หรือไม่?", [
+      { text: "ยกเลิก", style: "cancel" },
+      { text: "ออกจากระบบ", style: "destructive", onPress: logout },
+    ]);
+  };
+
   if (user) {
     return (
       <SafeAreaView style={styles.container}>
@@ -16,11 +23,14 @@ export default function Login() {
           <View style={styles.avatar}><Text style={styles.avatarText}>{user.username.charAt(0).toUpperCase()}</Text></View>
           <Text style={styles.profileName}>{user.username}</Text>
           <Text style={styles.profileEmail}>{user.email}</Text>
-        <View style={{ backgroundColor: user.role === "admin" ? "#bfa14a" : "#e0e0e0", paddingHorizontal: 12, paddingVertical: 4, borderRadius: 20, marginBottom: 20 }}>
+          <View style={{ backgroundColor: user.role === "admin" ? "#bfa14a" : "#e0e0e0", paddingHorizontal: 12, paddingVertical: 4, borderRadius: 20, marginBottom: 20 }}>
             <Text style={{ color: user.role === "admin" ? "#fff" : "#555", fontSize: 11, fontWeight: "700" }}>
               {user.role === "admin" ? "ADMIN" : "USER"}
             </Text>
           </View>
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <Text style={styles.logoutButtonText}>ออกจากระบบ</Text>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     );

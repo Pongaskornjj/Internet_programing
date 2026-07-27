@@ -1,13 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Image, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, Image, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useApp } from "../context/AppContext";
 
 const CATEGORIES = ["All", "Bags", "Shoes", "Accessories"];
 
 export default function Index() {
-  const { products, cart, addToCart, updateQuantity, cartCount, favorites, toggleFavorite } = useApp();
+  const { products, cart, addToCart, updateQuantity, cartCount, favorites, toggleFavorite, user, deleteProduct } = useApp();
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
@@ -21,6 +21,13 @@ export default function Index() {
 
   const formatPrice = (n: number) => `฿${n.toLocaleString()}`;
   const getQty = (id: string) => cart.find((c) => c.productId === id)?.quantity ?? 0;
+
+  const handleDeleteProduct = (id: string, name: string) => {
+    Alert.alert("ลบสินค้า", `ต้องการลบ "${name}" ใช่หรือไม่? การลบไม่สามารถย้อนกลับได้`, [
+      { text: "ยกเลิก", style: "cancel" },
+      { text: "ลบ", style: "destructive", onPress: () => deleteProduct(id) },
+    ]);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -88,6 +95,13 @@ export default function Index() {
                     </TouchableOpacity>
                   </View>
                 )}
+
+                {user?.role === "admin" && (
+                  <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteProduct(p.id, p.name)}>
+                    <Ionicons name="trash-outline" size={14} color="#e63946" />
+                    <Text style={styles.deleteButtonText}>ลบสินค้า</Text>
+                  </TouchableOpacity>
+                )}
               </View>
             );
           })
@@ -131,6 +145,8 @@ const styles = StyleSheet.create({
   stepper: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", backgroundColor: "#000", borderRadius: 8, marginTop: 8, paddingHorizontal: 6, paddingVertical: 4 },
   stepperBtn: { padding: 4 },
   stepperQty: { color: "#fff", fontWeight: "700", fontSize: 14 },
+  deleteButton: { flexDirection: "row", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#e63946", borderRadius: 8, paddingVertical: 6, marginTop: 6, gap: 4 },
+  deleteButtonText: { color: "#e63946", fontSize: 12, fontWeight: "600" },
   emptyState: { width: "100%", alignItems: "center", marginTop: 60 },
   emptyText: { color: "#999", marginTop: 10, fontSize: 14 },
 });
