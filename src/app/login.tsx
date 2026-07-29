@@ -3,11 +3,12 @@ import { Alert, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, Touchable
 import { useApp } from "../context/AppContext";
 
 export default function Login() {
-  const { user, login, register, logout } = useApp();
+  const { user, login, register, logout, authError } = useApp();
   const [mode, setMode] = useState("login");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const handleLogout = () => {
     Alert.alert("ออกจากระบบ", "คุณต้องการออกจากระบบใช่หรือไม่?", [
@@ -36,12 +37,23 @@ export default function Login() {
     );
   }
 
-  const handleSubmit = () => {
-    if (mode === "login") {
-      if (!login(username.trim(), password)) Alert.alert("เข้าสู่ระบบไม่สำเร็จ", "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
-    } else {
-      if (!username.trim() || !email.trim() || !password.trim()) { Alert.alert("กรอกข้อมูลไม่ครบ", "กรุณากรอกข้อมูลให้ครบทุกช่อง"); return; }
-      if (!register(username.trim(), email.trim(), password)) Alert.alert("สมัครไม่สำเร็จ", "มีชื่อผู้ใช้นี้อยู่แล้ว");
+  const handleSubmit = async () => {
+    if (submitting) return;
+    setSubmitting(true);
+    try {
+      if (mode === "login") {
+        const ok = await login(username.trim(), password);
+        if (!ok) Alert.alert("เข้าสู่ระบบไม่สำเร็จ", authError ?? "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
+      } else {
+        if (!username.trim() || !email.trim() || !password.trim()) {
+          Alert.alert("กรอกข้อมูลไม่ครบ", "กรุณากรอกข้อมูลให้ครบทุกช่อง");
+          return;
+        }
+        const ok = await register(username.trim(), email.trim(), password);
+        if (!ok) Alert.alert("สมัครไม่สำเร็จ", authError ?? "มีชื่อผู้ใช้นี้อยู่แล้ว");
+      }
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -59,8 +71,10 @@ export default function Login() {
         )}
         <Text style={styles.label}>รหัสผ่าน</Text>
         <TextInput style={styles.input} value={password} onChangeText={setPassword} secureTextEntry placeholder="••••••" />
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-          <Text style={styles.submitButtonText}>{mode === "login" ? "เข้าสู่ระบบ" : "สมัครสมาชิก"}</Text>
+        <TouchableOpacity style={[styles.submitButton, submitting && { opacity: 0.6 }]} onPress={handleSubmit} disabled={submitting}>
+          <Text style={styles.submitButtonText}>
+            {submitting ? "กำลังดำเนินการ..." : mode === "login" ? "เข้าสู่ระบบ" : "สมัครสมาชิก"}
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => setMode(mode === "login" ? "register" : "login")}>
           <Text style={styles.switchText}>{mode === "login" ? "ยังไม่มีบัญชี? สมัครสมาชิก" : "มีบัญชีอยู่แล้ว? เข้าสู่ระบบ"}</Text>
