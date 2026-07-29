@@ -6,13 +6,20 @@ import { Receipt, useApp } from "../context/AppContext";
 export default function Cart() {
   const { cart, products, updateQuantity, removeFromCart, cartTotal, checkout } = useApp();
   const [receipt, setReceipt] = useState<Receipt | null>(null);
+  const [processing, setProcessing] = useState(false);
 
   const formatPrice = (n: number) => `฿${n.toLocaleString()}`;
 
-  const handleCheckout = () => {
-    const r = checkout();
-    if (r) setReceipt(r);
-    else Alert.alert("ตะกร้าว่าง", "กรุณาเลือกสินค้าก่อนชำระเงิน");
+  const handleCheckout = async () => {
+    if (processing) return;
+    setProcessing(true);
+    try {
+      const r = await checkout();
+      if (r) setReceipt(r);
+      else Alert.alert("ทำรายการไม่สำเร็จ", "ตะกร้าว่างเปล่า หรือเกิดข้อผิดพลาดระหว่างชำระเงิน กรุณาลองใหม่");
+    } finally {
+      setProcessing(false);
+    }
   };
 
   if (receipt) {
@@ -87,8 +94,8 @@ export default function Cart() {
               <Text style={styles.totalLabel}>ยอดรวม</Text>
               <Text style={styles.totalValue}>{formatPrice(cartTotal)}</Text>
             </View>
-            <TouchableOpacity style={styles.checkoutButton} onPress={handleCheckout}>
-              <Text style={styles.checkoutButtonText}>ชำระเงิน</Text>
+            <TouchableOpacity style={[styles.checkoutButton, processing && { opacity: 0.6 }]} onPress={handleCheckout} disabled={processing}>
+              <Text style={styles.checkoutButtonText}>{processing ? "กำลังทำรายการ..." : "ชำระเงิน"}</Text>
             </TouchableOpacity>
           </View>
         </>

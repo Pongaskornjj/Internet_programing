@@ -1,9 +1,13 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Alert, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useApp } from "../context/AppContext";
 
+type RoleChoice = "admin" | "customer" | null;
+
 export default function Login() {
   const { user, login, register, logout, authError } = useApp();
+  const [roleChoice, setRoleChoice] = useState<RoleChoice>(null);
   const [mode, setMode] = useState("login");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -13,10 +17,11 @@ export default function Login() {
   const handleLogout = () => {
     Alert.alert("ออกจากระบบ", "คุณต้องการออกจากระบบใช่หรือไม่?", [
       { text: "ยกเลิก", style: "cancel" },
-      { text: "ออกจากระบบ", style: "destructive", onPress: logout },
+      { text: "ออกจากระบบ", style: "destructive", onPress: () => { logout(); setRoleChoice(null); } },
     ]);
   };
 
+  // ========== หน้าโปรไฟล์ (login แล้ว) ==========
   if (user) {
     return (
       <SafeAreaView style={styles.container}>
@@ -37,6 +42,41 @@ export default function Login() {
     );
   }
 
+  // ========== ขั้นที่ 1: เลือกบทบาท ==========
+  if (roleChoice === null) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.roleWrap}>
+          <Text style={styles.roleTitle}>เข้าสู่ระบบในฐานะ</Text>
+          <Text style={styles.roleSubtitle}>เลือกประเภทบัญชีที่ต้องการเข้าใช้งาน</Text>
+
+          <TouchableOpacity style={styles.roleCard} onPress={() => setRoleChoice("admin")}>
+            <View style={[styles.roleIconWrap, { backgroundColor: "#bfa14a" }]}>
+              <Ionicons name="shield-checkmark" size={26} color="#fff" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.roleCardTitle}>ผู้ดูแลระบบ (Admin)</Text>
+              <Text style={styles.roleCardDesc}>จัดการสินค้า เพิ่ม/ลบ และดูแลระบบร้านค้า</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#ccc" />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.roleCard} onPress={() => setRoleChoice("customer")}>
+            <View style={[styles.roleIconWrap, { backgroundColor: "#000" }]}>
+              <Ionicons name="person" size={26} color="#fff" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.roleCardTitle}>ลูกค้า (Customer)</Text>
+              <Text style={styles.roleCardDesc}>เลือกซื้อสินค้า ใส่ตะกร้า และชำระเงิน</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#ccc" />
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // ========== ขั้นที่ 2: ฟอร์ม login/register ==========
   const handleSubmit = async () => {
     if (submitting) return;
     setSubmitting(true);
@@ -57,10 +97,27 @@ export default function Login() {
     }
   };
 
+  const isAdminFlow = roleChoice === "admin";
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.form}>
-        <Text style={styles.header}>{mode === "login" ? "เข้าสู่ระบบ" : "สมัครสมาชิก"}</Text>
+        <TouchableOpacity style={styles.backRow} onPress={() => setRoleChoice(null)}>
+          <Ionicons name="arrow-back" size={18} color="#555" />
+          <Text style={styles.backText}>เปลี่ยนประเภทบัญชี</Text>
+        </TouchableOpacity>
+
+        <View style={[styles.roleBadge, { backgroundColor: isAdminFlow ? "#bfa14a" : "#000" }]}>
+          <Ionicons name={isAdminFlow ? "shield-checkmark" : "person"} size={14} color="#fff" />
+          <Text style={styles.roleBadgeText}>{isAdminFlow ? "ผู้ดูแลระบบ" : "ลูกค้า"}</Text>
+        </View>
+
+        <Text style={styles.header}>
+          {mode === "login"
+            ? (isAdminFlow ? "เข้าสู่ระบบผู้ดูแลระบบ" : "เข้าสู่ระบบลูกค้า")
+            : "สมัครสมาชิก"}
+        </Text>
+
         <Text style={styles.label}>ชื่อผู้ใช้</Text>
         <TextInput style={styles.input} value={username} onChangeText={setUsername} autoCapitalize="none" placeholder="username" />
         {mode === "register" && (
@@ -79,7 +136,9 @@ export default function Login() {
         <TouchableOpacity onPress={() => setMode(mode === "login" ? "register" : "login")}>
           <Text style={styles.switchText}>{mode === "login" ? "ยังไม่มีบัญชี? สมัครสมาชิก" : "มีบัญชีอยู่แล้ว? เข้าสู่ระบบ"}</Text>
         </TouchableOpacity>
-        <Text style={styles.hint}>ทดลองใช้: username "admin" / password "1234"</Text>
+        {isAdminFlow && mode === "login" && (
+          <Text style={styles.hint}>ทดลองใช้: username "admin" / password "1234"</Text>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -87,7 +146,23 @@ export default function Login() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f5f5f5" },
-  form: { padding: 24, paddingTop: 40 },
+  form: { padding: 24, paddingTop: 30 },
+
+  // Role selection screen
+  roleWrap: { flex: 1, padding: 24, paddingTop: 60, justifyContent: "flex-start" },
+  roleTitle: { fontSize: 24, fontWeight: "800", color: "#222", textAlign: "center" },
+  roleSubtitle: { fontSize: 13, color: "#999", textAlign: "center", marginTop: 6, marginBottom: 36 },
+  roleCard: { flexDirection: "row", alignItems: "center", backgroundColor: "#fff", borderRadius: 16, padding: 16, marginBottom: 16, gap: 14, shadowColor: "#000", shadowOpacity: 0.06, shadowRadius: 8, elevation: 2 },
+  roleIconWrap: { width: 50, height: 50, borderRadius: 25, alignItems: "center", justifyContent: "center" },
+  roleCardTitle: { fontSize: 15, fontWeight: "700", color: "#222" },
+  roleCardDesc: { fontSize: 12, color: "#999", marginTop: 2 },
+
+  // Back row + badge on the form screen
+  backRow: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 16 },
+  backText: { color: "#555", fontSize: 13, fontWeight: "600" },
+  roleBadge: { flexDirection: "row", alignItems: "center", alignSelf: "center", gap: 6, paddingHorizontal: 12, paddingVertical: 5, borderRadius: 20, marginBottom: 14 },
+  roleBadgeText: { color: "#fff", fontSize: 11, fontWeight: "700" },
+
   header: { fontSize: 22, fontWeight: "700", marginBottom: 24, color: "#222", textAlign: "center" },
   label: { fontSize: 13, fontWeight: "600", color: "#555", marginBottom: 6, marginTop: 14 },
   input: { backgroundColor: "#fff", borderRadius: 10, paddingHorizontal: 14, paddingVertical: 12, borderWidth: 1, borderColor: "#eee", fontSize: 14 },
@@ -95,6 +170,7 @@ const styles = StyleSheet.create({
   submitButtonText: { color: "#fff", fontWeight: "700", fontSize: 15 },
   switchText: { color: "#bfa14a", textAlign: "center", marginTop: 18, fontWeight: "600", fontSize: 13 },
   hint: { textAlign: "center", color: "#aaa", fontSize: 11, marginTop: 30 },
+
   profileCard: { alignItems: "center", padding: 40 },
   avatar: { width: 80, height: 80, borderRadius: 40, backgroundColor: "#000", alignItems: "center", justifyContent: "center", marginBottom: 14 },
   avatarText: { color: "#bfa14a", fontSize: 32, fontWeight: "700" },
